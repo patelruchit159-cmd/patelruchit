@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Groundwater Monitor – Surat District</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap for Trends section -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* GENERAL STYLES */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #030712;
+      color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+    nav ul {
+      display: flex;
+      gap: 40px;
+      white-space: nowrap;
+    }
+    nav ul li {
+      list-style: none;
+    }
+    nav a {
+      white-space: nowrap;
+      cursor: pointer;
+      text-decoration: none;
+      color: #d1d5db;
+      margin: 0 15px;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+    
+    nav a:hover { color: white; }
+    .logo {
+      width:44px;height:44px;border-radius:10px;
+      background:radial-gradient(circle at 30% 30%, var(--brand), var(--accent));
+      box-shadow:0 8px 24px rgba(91,192,190,.25), inset 0 0 24px rgba(91,192,190,.25);
+
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #14b8a6, #3b82f6);
+    }
+    .hero {
+      text-align: center;
+      padding-top: 150px;
+      padding-bottom: 50px;
+    }
+    .live-btn {
+      background: #0f766e;
+      padding: 10px 22px;
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      display: inline-block;
+    }
+    h1 { font-size: 48px; margin-top: 25px; margin-bottom: 20px; }
+    .subtitle {
+      margin: 0 auto;
+      max-width: 750px;
+      font-size: 18px;
+      color: #cbd5e1;
+    }
+    .btn-group {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .btn {
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 20px;
+      cursor: pointer;
+      border: none;
+      transition: 0.3s;
+    }
+    .green { background: #22c55e; color: black; }
+    .green:hover { background: #16a34a; }
+    .dark { background: #1e293b; color: white; }
+    .dark:hover { background: #334155; }
+    .stats {
+      margin: 60px auto;
+      display: grid;
+      width: 90%;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 25px;
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .card-title { font-size: 18px; color: #94a3b8; margin-bottom: 15px; }
+    .card-value { font-size: 36px; font-weight: bold;
+  color: rgb(80, 200, 239);   /* Light blue color here */
+}
+    .section-title { font-size: 32px; text-align: center; margin-top: 40px; }
+
+    /* REPORTS SECTION */
+    #reportsSection, #trendsSection {
+      margin-top: 40px;
+      padding: 20px;
+      display: none;
+    }
+    #reportsSection { background: #0f172a; border-top: 2px solid #1e293b; }
+    #reportsSection header, #reportsSection footer { background: #111827; padding: 16px 24px; }
+    #reportsSection .container, #trendsSection .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    #reportsSection h1, #trendsSection h1 { font-size: 28px; margin-bottom: 8px; }
+    #reportsSection .summary, #trendsSection .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+    #reportsSection .summary-item { background: #0b1220; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.08); }
+    #reportsSection .summary-item .label { font-size: 13px; color: #9ca3af; }
+    #reportsSection .summary-item .value { font-size: 22px; font-weight: bold; margin-top: 6px; }
+    #reportsSection .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    #reportsSection .filter-bar input, #reportsSection .filter-bar select { padding: 10px; border-radius: 8px; border: none; background: #1f2937; color: #e5e7eb; }
+    #reportsSection .filter-bar button { padding: 10px 16px; border-radius: 8px; background: #2563eb; color: white; border: none; font-weight: bold; cursor: pointer; }
+    #reportsSection table { width: 100%; border-collapse: collapse; background: #0b1220; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; overflow: hidden; }
+    #reportsSection th, #reportsSection td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.06); }
+    #reportsSection th { background: #111827; color: #9ca3af; }
+    #reportsSection td { color: #e5e7eb; }
+    #reportsSection .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 40px; }
+
+    /* TRENDS SECTION */
+    .card-metric { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; text-align: center; background: #111827; color: white; }
+    .card-metric .value { font-size: 1.75rem; font-weight: bold; }
+    .card-metric .label { color: #cbd5e1; }
+    footer.trends-footer { margin-top: 40px; text-align: center; color: #888; font-size: 0.9rem; }
+
+    /* EXTRA SECTIONS FOR NAVIGATION */
+    .section-placeholder { padding: 120px; text-align: center; font-size: 28px; color: #94a3b8; }
+      :root{
+      --bg:#0b132b;
+      --panel:#1c2541;
+      --accent:#3a506b;
+      --brand:#5bc0be;
+      --text:#eaf2f8;
+      --muted:#b8c4d8;
+      --ok:#32d17f;
+      --warn:#ffb84d;
+      --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">
+      <div class="logo-icon"></div>
+      Groundwater Monitor — Surat District
+    </div>
+    <div>
+      <a onclick="goHome()">Home</a>
+      <a onclick="showReports()">District reports</a>
+      <a onclick="showTrends()">Monthly trends</a>
+      <a onclick="scrollToSection('about')">About</a>
+      <a onclick="scrollToSection('contact')">Contact</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="live-btn">Live monitoring system</div>
+    <h1>District-wise Groundwater</h1>
+    <p class="subtitle">Real-time tracking and analysis of groundwater levels across Surat.</p>
+    <div class="btn-group">
+      <button class="btn green" onclick="showReports()">View Reports</button>
+      <button class="btn dark" onclick="showTrends()">Analyze Trends</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="card">
+      <div class="card-title">Total Talukas</div>
+      <div class="card-value">8</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Monitoring Wells</div>
+      <div class="card-value">45</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Data Points</div>
+      <div class="card-value">540</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Last Updated</div>
+      <div class="card-value">Today</div>
+    </div>
+  </div>
+
+  <!-- REPORTS SECTION -->
+  <div id="reportsSection">
+    <header>
+      <h1>District Reports</h1>
+      <p>Comprehensive groundwater level data for Surat District</p>
+    </header>
+    <main class="container">
+      <div class="summary">
+        <div class="summary-item">
+          <div class="label">Total Talukas</div>
+          <div class="value">8</div>
+        </div>
+        <div class="summary-item">
+          <div class="label">Avg Water Level</div>
+          <div class="value">11.2m</div>
+        </div>
+        <div class="summary-item">
+          <div class="label">Critical Areas</div>
+          <div class="value">1</div>
+        </div>
+        <div class="summary-item">
+          <div class="label">Total Wells</div>
+          <div class="value">45</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" placeholder="Search taluka..." />
+        <select>
+          <option>All Status</option>
+          <option>Normal</option>
+          <option>Low</option>
+          <option>Critical</option>
+          <option>Moderate</option>
+        </select>
+        <button>Download Report</button>
+      </div>
+
+      <h2>Taluka-wise Water Levels</h2>
+      <p>Real-time groundwater monitoring data</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Taluka</th>
+            <th>Monitoring Wells</th>
+            <th>Avg Water Level (m)</th>
+            <th>Trend</th>
+            <th>Status</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Chorasi</td><td>6</td><td>12.5</td><td>–</td><td>Normal</td><td>2025-01-08</td></tr>
+          <tr><td>Kamrej</td><td>7</td><td>8.3</td><td>↓</td><td>Low</td><td>2025-01-08</td></tr>
+          <tr><td>Olpad</td><td>5</td><td>15.2</td><td>↑</td><td>Normal</td><td>2025-01-08</td></tr>
+          <tr><td>Palsana</td><td>6</td><td>10.7</td><td>–</td><td>Normal</td><td>2025-01-08</td></tr>
+          <tr><td>Mangrol</td><td>5</td><td>7.5</td><td>↓</td><td>Critical</td><td>2025-01-08</td></tr>
+          <tr><td>Mahuva</td><td>6</td><td>14.1</td><td>↑</td><td>Normal</td><td>2025-01-08</td></tr>
+          <tr><td>Umarpada</td><td>5</td><td>11.8</td><td>–</td><td>Normal</td><td>2025-01-08</td></tr>
+          <tr><td>Bardoli</td><td>5</td><td>9.2</td><td>↓</td><td>Moderate</td><td>2025-01-08</td></tr>
+        </tbody>
+      </table>
+
+      <footer class="footer-grid">
+        <div>
+          <h4>Groundwater Monitor</h4>
+          <p>Monitoring and managing groundwater resources for sustainable water management in Surat District.</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul>
+            <li>Home</li>
+            <li>District Reports</li>
+            <li>Monthly Trends</li>
+            <li>About</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li>Data Portal</li>
+            <li>Documentation</li>
+            <li>FAQ</li>
+            <li>Support</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li>Collector Office, Surat</li>
+            <li>+91 8238237227</li>
+            <li>jainishvasava3103@gmail.com</li>
+             <li>Ruchitpatel@gmail.com</li>
+          </ul>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- TRENDS SECTION -->
+  <div id="trendsSection">
+    <header>
+      <h1>Monthly Trends</h1>
+      <p>Historical groundwater level analysis and trends</p>
+    </header>
+    <main class="container">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label for="talukaSelect" class="form-label">Select Taluka</label>
+          <select id="talukaSelect" class="form-select">
+            <option>Chorasi</option>
+            <option>Mangrol</option>
+            <option>Olpad</option>
+            <option>Palsana</option>
+            <option>Mahuva</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="timeRangeSelect" class="form-label">Time Range</label>
+          <select id="timeRangeSelect" class="form-select">
+            <option>Last 6 Months</option>
+            <option>Last 12 Months</option>
+            <option>Last 24 Months</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tabs for chart type -->
+      <ul class="nav nav-tabs mb-3" id="chartTypeTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="line-tab" data-bs-toggle="tab" data-bs-target="#lineChartTab" type="button">Line Chart</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="area-tab" data-bs-toggle="tab" data-bs-target="#areaChartTab" type="button">Area Chart</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="comp-tab" data-bs-toggle="tab" data-bs-target="#comparisonTab" type="button">Comparison</button>
+        </li>
+      </ul>
+
+      <div class="tab-content mb-4">
+        <div class="tab-pane fade show active" id="lineChartTab">
+          <canvas id="waterLevelChart" height="200"></canvas>
+        </div>
+        <div class="tab-pane fade" id="areaChartTab">
+          <canvas id="waterLevelAreaChart" height="200"></canvas>
+        </div>
+        <div class="tab-pane fade" id="comparisonTab">
+          <p class="text-center text-muted">Comparison view (to be implemented)</p>
+        </div>
+      </div>
+
+      <!-- Metric cards -->
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card-metric">
+            <div class="label">Average Decline (across all talukas, 6 months)</div>
+            <div class="value text-danger">-6.6%</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-metric">
+            <div class="label">Most Critical</div>
+            <div class="value">Mangrol<br><span class="small text-muted">-8.5% decline rate</span></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-metric">
+            <div class="label">Best Performance</div>
+            <div class="value">Olpad<br><span class="small text-muted">15.2 m average level</span></div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="trends-footer">
+        © 2025 Collector Office, Surat. All rights reserved.
+      </footer>
+    </main>
+  </div>
+
+  <!-- OTHER SECTIONS -->
+  <div id="about" class="section-placeholder">ℹ About Section</div>
+    <div class="container">
+    <header>
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>District-wise Groundwater Monitoring System</h1>
+        <div class="subtitle">A comprehensive solution for Surat District to combat illegal water extraction and enable sustainable water management.</div>
+        <div class="taglist" aria-label="Key tags">
+          <span class="tag">Surat District</span>
+          <span class="tag">Taluka-wise reports</span>
+          <span class="tag">Monthly monitoring</span>
+          <span class="tag">Transparency</span>
+          <span class="tag">Predictive planning</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left column -->
+      <section aria-labelledby="about">
+        <h2 id="about">About the project</h2>
+        <p>
+          A comprehensive system for tracking and managing groundwater resources across Surat District. Built to curb illegal extraction and
+          provide the visibility required for sustainable, data-driven decision-making.
+        </p>
+
+      <!-- Right column -->
+      <section aria-labelledby="challenge">
+        <h2 id="challenge">The challenge</h2>
+        <p>
+          Textile and chemical industries in Surat rely heavily on water. To meet demand, illegal suppliers have emerged, extracting
+          groundwater without regulation—reducing underground reserves and risking summer shortages.
+        </p>
+        <p>
+          Agencies lack reliable, monthly visibility into groundwater levels across jurisdictions. Without continuous monitoring, it’s hard to
+          identify illegal activity or plan for water-scarce periods.
+        </p>
+        <div class="badge warn" title="Data visibility is limited">Limited visibility</div>
+      </section>
+    </div>
+
+    <section aria-labelledby="solution" style="margin-top:16px">
+      <h2 id="solution">Our solution</h2>
+      <ul class="list-strong">
+        <li><strong>Automated monitoring:</strong> District-wide sensors and data ingestion for continuous tracking.</li>
+        <li><strong>Monthly taluka-wise reports:</strong> Standardized summaries and charts for each taluka.</li>
+        <li><strong>Real-time alerts:</strong> Identify suspicious extraction patterns to flag potential illegal activity.</li>
+        <li><strong>Decision support:</strong> Insights help agencies plan allocation and interventions with confidence.</li>
+        <li><strong>Predictive planning:</strong>
+          Uses historical trends to forecast summer water needs and allocation requirements.</li>
+        <li><strong>Data transparency:</strong>
+          Public portal to create awareness and trust through accessible groundwater information.</li>
+      </ul>
+
+      <div class="chart" role="img" aria-label="Placeholder chart for groundwater levels by taluka">
+        Taluka-wise groundwater level chart (placeholder)
+      </div>
+    </section>
+
+    <section aria-labelledby="features" style="margin-top:16px">
+      <h2 id="features">Key capabilities</h2>
+      <ul class="list-strong">
+        <li><strong>Coverage:</strong> Surat District with taluka granularity.</li>
+        <li><strong>Frequency:</strong> Monthly level snapshots with trend analysis.</li>
+        <li><strong>Anomaly detection:</strong> Threshold-based flags and pattern deviation alerts.</li>
+        <li><strong>Compliance support:</strong> Evidence packs to assist enforcement against illegal extraction.</li>
+        <li><strong>Open data:</strong> Exportable CSV/JSON and public dashboards.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="tech" style="margin-top:16px">
+      <h2 id="tech">Implementation overview</h2>
+      <ul class="list-strong">
+        <li><strong>Data pipeline:</strong> Sensor input → validation → storage → analytics → dashboards.</li>
+        <li><strong>Reporting:</strong> Automated monthly generation per taluka with charts and commentary.</li>
+        <li><strong>Alerting:</strong> Real-time thresholds and anomaly rules configurable by agencies.</li>
+        <li><strong>Access control:</strong> Role-based views for agencies and public read-only access.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="cta" style="margin-top:16px">
+      <h2 id="cta">Get started</h2>
+      <ul class="list-strong">
+        <li><strong>Request access:</strong> Enable agency credentials for dashboards and alert management.</li>
+        <li><strong>Submit data sources:</strong> Register sensors and legacy datasets for ingestion.</li>
+        <li><strong>Engage the public:</strong> Publish the transparency portal to raise awareness.</li>
+      </ul>
+    </section>
+
+    <div class="footer">
+      <div>© Surat District Water Management Initiative</div>
+      <div class="muted">Built to promote sustainable groundwater stewardship and curb illegal extraction.</div>
+    </div>
+  </div>
+
+  <div id="contact" class="section-placeholder">📞 Contact Section</div>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function goHome() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      hideAllSections();
+    }
+    function showReports() {
+      hideAllSections();
+      document.getElementById("reportsSection").style.display = "block";
+      window.scrollTo({ top: document.getElementById("reportsSection").offsetTop - 50, behavior: 'smooth' });
+    }
+    function showTrends() {
+      hideAllSections();
+      document.getElementById("trendsSection").style.display = "block";
+      window.scrollTo({ top: document.getElementById("trendsSection").offsetTop - 50, behavior: 'smooth' });
+    }
+    function scrollToSection(id) {
+      hideAllSections();
+      const el = document.getElementById(id);
+      el.scrollIntoView({behavior:"smooth"});
+    }
+    function hideAllSections() {
+      document.getElementById("reportsSection").style.display = "none";
+      document.getElementById("trendsSection").style.display = "none";
+    }
+
+    // Chart.js data
+    const labels = ['Jul 2024', 'Aug 2024', 'Sep 2024', 'Oct 2024', 'Nov 2024', 'Dec 2024'];
+    const dataValues = [13.0, 12.8, 12.6, 12.4, 12.3, 12.3];
+
+    const ctx = document.getElementById('waterLevelChart').getContext('2d');
+    const waterLevelChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Chorasi',
+          data: dataValues,
+          borderColor: '#0095ff',
+          backgroundColor: 'transparent',
+          tension: 0.2,
+          pointRadius: 4,
+          pointBackgroundColor: '#0095ff',
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: false, suggestedMin: 10, suggestedMax: 16, title: { display: true, text: 'Water Level (m)' } } },
+        plugins: { legend: { display: true } }
+      }
+    });
+
+    const ctxArea = document.getElementById('waterLevelAreaChart').getContext('2d');
+    const waterLevelAreaChart = new Chart(ctxArea, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Chorasi',
+          data: dataValues,
+          borderColor: '#0095ff',
+          backgroundColor: 'rgba(0, 149, 255, 0.2)',
+          fill: true,
+          tension: 0.2,
+          pointRadius: 3,
+          pointBackgroundColor: '#0095ff',
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: false, suggestedMin: 10, suggestedMax: 16, title: { display: true, text: 'Water Level (m)' } } },
+        plugins: { legend: { display: true } }
+      }
+    });
+  </script>
+</body>
+</html>
